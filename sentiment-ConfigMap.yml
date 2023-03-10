@@ -1,0 +1,14 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sentiment
+  namespace: test
+data:
+  TRANSFORMERS_CACHE: /app/cache
+  bootstrap_servers: 'changeme:port'
+  password: changeme
+  produce_topic: changeme
+  sasl_mechanism: PLAIN
+  security_protocol: SASL_SSL
+  topic: changeme
+  username: changeme
