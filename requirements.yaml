@@ -1,0 +1,6 @@
+kafka-python
+transformers
+ssl
+json
+os
+torch
