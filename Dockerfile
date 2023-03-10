@@ -2,11 +2,12 @@ FROM python:3.9
 
 RUN mkdir /app
 WORKDIR /app
-RUN mkdir /app/cache
+RUN mkdir -p /app/cache
 ENV TRANSFORMERS_CACHE=/app/cache/
 COPY * /app
-RUN chmod -R 755 /app/cache
+RUN chown -R 1001:0 /app\
+&&  chmod -R og+rwx /app \
+&&  chmod -R +x /app
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r /app/requirements.txt
-RUN chmod +x /app/*
 CMD ["python", "/app/sentiment_analysis_bert_kafka.py"]
