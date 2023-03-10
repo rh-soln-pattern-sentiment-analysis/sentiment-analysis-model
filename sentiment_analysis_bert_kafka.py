@@ -26,13 +26,14 @@ from datetime import datetime
 #Is this really worth! (positive)
 #% Reached end of topic produce-topic [0] at offset 2
 
-bootstrap_servers = ['XXXXXXXXXX.kafka.rhcloud.com:443']
-topic = 'consume-topic'
-produce_topic = 'produce-topic'
-username = 'XXXXXXXXXX'
-password = 'XXXXXXXXXX'
-sasl_mechanism = 'PLAIN'
-security_protocol = 'SASL_SSL'
+TRANSFORMERS_CACHE = os.environ['TRANSFORMERS_CACHE']
+bootstrap_servers = os.environ['bootstrap_servers']
+topic = os.environ['topic']
+produce_topic = os.environ['produce_topic']
+username = os.environ['username']
+password = os.environ['password']
+sasl_mechanism = os.environ['sasl_mechanism']
+security_protocol = os.environ['security_protocol']
 
 # Set up a Kafka consumer
 consumer = KafkaConsumer(
