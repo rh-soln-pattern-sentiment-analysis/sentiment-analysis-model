@@ -1,16 +1,5 @@
-# %%
-pip install kafka-python
-
-# %%
-pip install transformers
-
-# %%
 from kafka.consumer import KafkaConsumer
-
-# %%
 from kafka.producer import KafkaProducer
-
-# %%
 from kafka.errors import KafkaError
 from transformers import pipeline
 import ssl
@@ -20,26 +9,23 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 from datetime import datetime
 
-# %%
 # On one screen try this in a terminal window to generate messages. Ensure that kcat is installed to test this manually.
-kcat -t consume-topic  -b "$KAFKA_HOST" \
- -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
- -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
- -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -P
-Testing doesnt look good
-Is this really worth!
+# kcat -t consume-topic  -b "$KAFKA_HOST" \
+# -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
+# -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
+# -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -P
+#Testing doesnt look good
+#Is this really worth!
 
-# %%
 # On another screen try this to get the output from another topic
- kcat -t produce-topic  -b "$KAFKA_HOST" \
- -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
- -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
- -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -C
-Testing doesnt look good (negative)
-Is this really worth! (positive)
-% Reached end of topic produce-topic [0] at offset 2
+# kcat -t produce-topic  -b "$KAFKA_HOST" \
+# -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
+# -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
+# -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -C
+#Testing doesnt look good (negative)
+#Is this really worth! (positive)
+#% Reached end of topic produce-topic [0] at offset 2
 
-# %%
 bootstrap_servers = ['XXXXXXXXXX.kafka.rhcloud.com:443']
 topic = 'consume-topic'
 produce_topic = 'produce-topic'
@@ -76,13 +62,6 @@ model = AutoModelForSequenceClassification.from_pretrained(model_name)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
-# Continuously listen for incoming messages and analyze their sentiment
-#for message in consumer:
-#    text = message.value.decode('utf-8')
-#    sentiment = analyze_sentiment(text)
-#    print(text)
-#    producer.send(produce_topic, sentiment.encode('utf-8'))
-    
 # Start consuming Kafka messages
 for message in consumer:
     # Get the text message from the Kafka message
@@ -104,8 +83,3 @@ for message in consumer:
     # Produce a response message with the sentiment
     response_message = f"{timestamp} {customer_id},{product_id}, {text} ({'positive' if sentiment > 0 else 'negative' if sentiment < 0 else 'neutral'})"
     producer.send(produce_topic, response_message.encode('utf-8'))
-
-# %%
-
-
-
