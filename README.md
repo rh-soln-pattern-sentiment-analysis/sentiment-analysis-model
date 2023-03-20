@@ -54,7 +54,8 @@ export RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET=<CHANGEME>
 ```
 
 Ensure that you use the right topic if its difference than the one listed below.
-```kcat -t consume-topic  -b "$KAFKA_HOST" \
+
+```# kcat -t consume-topic  -b "$KAFKA_HOST" \
  -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
  -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
  -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -P
@@ -63,7 +64,8 @@ Ensure that you use the right topic if its difference than the one listed below.
 On this terminal you type your message which will be consumed by model for analysis.
 
 Ensure that you use the right topic if its difference than the one listed below.
-```kcat -t produce-topic  -b "$KAFKA_HOST" \
+
+```# kcat -t produce-topic  -b "$KAFKA_HOST" \
  -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
  -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
  -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -C 
