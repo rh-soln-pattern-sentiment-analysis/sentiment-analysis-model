@@ -9,7 +9,8 @@ In this project create a configmap with following. You will need to change kafka
 Also change the topics based on the ones you have created and provided R/W access to those topics with the above user/password.
 
 1) ConfigMap in OpenShift Project :
-```kind: ConfigMap
+```
+kind: ConfigMap
 apiVersion: v1
 metadata:
   name: sentiment
@@ -30,7 +31,8 @@ data:
 
 2) Create this pod and that's it.
 
-```apiVersion: v1
+```
+apiVersion: v1
 kind: Pod
 metadata:
   name: sentiment-analysis
@@ -48,14 +50,16 @@ Run the following on different terminals, one to consume and other to producer.
 Ensure that you have installed kcat on your system. 
 Ensure that the following variables are exported on your terminal shell.
 
-```export KAFKA_HOST=<CHANGEME>:443
+```
+export KAFKA_HOST=<CHANGEME>:443
 export RHOAS_SERVICE_ACCOUNT_CLIENT_ID=<CHANGEME>
 export RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET=<CHANGEME>
 ```
 
 Ensure that you use the right topic if its difference than the one listed below.
 
-```# kcat -t consume-topic  -b "$KAFKA_HOST" \
+```
+kcat -t consume-topic  -b "$KAFKA_HOST" \
  -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
  -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
  -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -P
@@ -65,7 +69,8 @@ On this terminal you type your message which will be consumed by model for analy
 
 Ensure that you use the right topic if its difference than the one listed below.
 
-```# kcat -t produce-topic  -b "$KAFKA_HOST" \
+```
+kcat -t produce-topic  -b "$KAFKA_HOST" \
  -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
  -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
  -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -C 
