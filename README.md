@@ -76,5 +76,7 @@ kcat -t produce-topic  -b "$KAFKA_HOST" \
  -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -C 
 ```
 
-You should see the output here after analysis.
+You should see the output here on this second terminal after analysis.
+
+You can also check in the Kafka UI and specific topic messages. The output will be in json format.
 
