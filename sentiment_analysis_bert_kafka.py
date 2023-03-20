@@ -9,23 +9,6 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 from datetime import datetime
 
-# On one screen try this in a terminal window to generate messages. Ensure that kcat is installed to test this manually.
-# kcat -t consume-topic  -b "$KAFKA_HOST" \
-# -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
-# -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
-# -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -P
-#Testing doesnt look good
-#Is this really worth!
-
-# On another screen try this to get the output from another topic
-# kcat -t produce-topic  -b "$KAFKA_HOST" \
-# -X security.protocol=SASL_SSL -X sasl.mechanisms=PLAIN \
-# -X sasl.username="$RHOAS_SERVICE_ACCOUNT_CLIENT_ID" \
-# -X sasl.password="$RHOAS_SERVICE_ACCOUNT_CLIENT_SECRET" -C
-#Testing doesnt look good (negative)
-#Is this really worth! (positive)
-#% Reached end of topic produce-topic [0] at offset 2
-
 TRANSFORMERS_CACHE = os.environ['TRANSFORMERS_CACHE']
 bootstrap_servers = os.environ['bootstrap_servers']
 topic = os.environ['topic']
@@ -67,9 +50,9 @@ model = model.to(device)
 for message in consumer:
     # Get the text message from the Kafka message
     timestamp = datetime.fromtimestamp(message.timestamp/1000.0)
-    print(timestamp)
+    timestamp = timestamp.strftime("%m/%d/%Y, %H:%M:%S")
     text = message.value.decode('utf-8')
-    print(text)
+    # May need to use this later - customer_id, product_id, review_text = text.split(",")
     # Tokenize the text message
     inputs = tokenizer(text, padding=True, truncation=True, max_length=512, return_tensors='pt')
     inputs = inputs.to(device)
@@ -80,7 +63,11 @@ for message in consumer:
     sentiment = int(predictions.argmax(axis=1)[0]) - 1  # Convert 0-4 to -1-3
     customer_id = 1023
     product_id = 1
-    sentiment_output = f"{customer_id},{product_id},{sentiment}" 
-    # Produce a response message with the sentiment
-    response_message = f"{timestamp} {customer_id},{product_id}, {text} ({'positive' if sentiment > 0 else 'negative' if sentiment < 0 else 'neutral'})"
-    producer.send(produce_topic, response_message.encode('utf-8'))
+    data = {}
+    data['sentiment'] = sentiment
+    data['text-comment'] = text
+    response = f"{'positive' if sentiment > 0 else 'negative' if sentiment < 0 else 'neutral'}"
+    data['response'] = response    
+    json_data = json.dumps(data)
+    json_string = json.dumps({'timestamp': timestamp, 'customer_id': customer_id,'product_id': product_id,'sentiment': sentiment,'text': text,'response': response})
+    producer.send(produce_topic, json_string.encode('utf-8')) 
