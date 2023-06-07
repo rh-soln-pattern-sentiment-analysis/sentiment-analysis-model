@@ -51,7 +51,9 @@ for message in consumer:
     # Get the text message from the Kafka message
     timestamp = datetime.fromtimestamp(message.timestamp/1000.0)
     timestamp = timestamp.strftime("%m/%d/%Y, %H:%M:%S")
-    text = message.value.decode('utf-8')
+    sentiment_data = message.value
+    text = sentiment_data["review_text"]
+    text = text.decode('utf-8')
     # May need to use this later - customer_id, product_id, review_text = text.split(",")
     # Tokenize the text message
     inputs = tokenizer(text, padding=True, truncation=True, max_length=512, return_tensors='pt')
@@ -61,8 +63,10 @@ for message in consumer:
     outputs = model(**inputs)
     predictions = torch.softmax(outputs.logits, dim=1).detach().cpu().numpy()
     sentiment = int(predictions.argmax(axis=1)[0]) - 1  # Convert 0-4 to -1-3
-    customer_id = 1023
-    product_id = 1
+    customer_id = sentiment_data["customer_id"]
+    product_id = sentiment_data["product_id"]
+    #customer_id = 1023
+    #product_id = 1
     data = {}
     data['sentiment'] = sentiment
     data['text-comment'] = text
