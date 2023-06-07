@@ -1,8 +1,5 @@
 FROM python:3.9
 
-RUN dnf copr enable bvn13/kcat
-RUN dnf update
-RUN dnf install kafkacat
 RUN mkdir /app
 WORKDIR /app
 RUN mkdir -p /app/cache
