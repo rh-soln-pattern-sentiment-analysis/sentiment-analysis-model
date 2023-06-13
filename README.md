@@ -2,6 +2,10 @@
 
 Repository for sentiment analysis related code - to be used for text analysis and part of AI/ML.
 
+Deployment for both sentiment and language analysis with configmap is available in deployment yaml file in this project folder - use project globex-mw-user1 project or update for your project. Ensure that Kafka is set locally and bootstrap server is setup correctly in configmap. This one is using SCRAM-SHA-512 as sasl_mechanism.
+Download the deployment.yaml file and do a `oc apply -f deployment.yaml` to setup configmap and deployment for both sentiment analysis and language analysis.
+
+Additonal details below.
 To run sentiment analysis with kafa on openshift, follow this :
 
 Create a project in openshift
