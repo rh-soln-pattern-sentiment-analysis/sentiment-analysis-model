@@ -2,3 +2,7 @@ kafka-python
 transformers
 torch
 cloudevents
+kafka-python
+transformers
+cloudevents
+requests

@@ -8,16 +8,23 @@ import os
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 from datetime import datetime
-from ssl import SSLContext, PROTOCOL_TLSv1
+from cloudevents.http import CloudEvent
+from cloudevents.http import from_http
+from cloudevents.conversion import to_binary
+import requests
 
 TRANSFORMERS_CACHE = os.environ['TRANSFORMERS_CACHE']
 bootstrap_servers = os.environ['bootstrap_servers']
-topic = os.environ['topic']
-produce_topic = os.environ['produce_topic']
 username = os.environ['username']
 password = os.environ['password']
 sasl_mechanism = os.environ['sasl_mechanism']
 security_protocol = os.environ['security_protocol']
+topic = os.environ['topic']
+reviews_sentiment_sink = os.environ['reviews_sentiment_sink']
+attributes = {
+    "type": os.environ['ce_type'],
+    "source": os.environ['ce_source']
+}
 
 # Set up a Kafka consumer
 consumer = KafkaConsumer(
@@ -32,15 +39,8 @@ consumer = KafkaConsumer(
 #    value_deserializer=lambda m: json.loads(m.decode('utf-8'))    
 )
 
-# Set up a Kafka producer
-producer = KafkaProducer(
-    bootstrap_servers=bootstrap_servers,
-    sasl_plain_username=username,
-    sasl_plain_password=password,
-    security_protocol=security_protocol,
-    sasl_mechanism=sasl_mechanism,
-#    value_serializer=lambda m: json.dumps(m).encode('utf-8')    
-)
+
+
 
 # Load the BERT model and tokenizer
 model_name = 'nlptown/bert-base-multilingual-uncased-sentiment'
@@ -50,16 +50,18 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 
 # Start consuming Kafka messages
+print("Entering for loop")
 for message in consumer:
     try:    
         # Get the text message from the Kafka message
+        print("message.value", message.value)
+        print("message.headers", message.headers)
         json_payload = message.value
         # Parse the CloudEvent from the JSON payload
         sentiment_data =  json.loads(json_payload)
- #       print(sentiment_data)
-        sentiment_event_data = sentiment_data
+        
         try:
-            review_text = sentiment_event_data['review_text']
+            review_text = sentiment_data['review_text']
         except KeyError:
             print("Not valid data input syntax")
         except ValueError:
@@ -75,18 +77,18 @@ for message in consumer:
         response = f"{'positive' if sentiment > 0 else 'negative' if sentiment < 0 else 'neutral'}"
 
         # Capture language analysis output as sentiment
-        sentiment_event_data['score'] = sentiment
-        sentiment_event_data['response'] = response
-#        print(sentiment_event_data)
-        #sentiment_data['data'] = sentiment_event_data       
-#        print(sentiment_data)
+        sentiment_data['score'] = sentiment
+        sentiment_data['response'] = response
         json_string = json.dumps(sentiment_data)
-        headers = [
-                        ("Ce-Specversion","1.0".encode('utf-8')),
-                        ("Ce-Type","sentiment-event".encode('utf-8')),
-                        ("Ce-Source","sentiment".encode('utf-8'))
-                        ]
-        producer.send(produce_topic, json_string.encode('utf-8') , None, headers)    
+        
+        event = CloudEvent({ "type": "reviews-sentiment-event", "source": "reviews-sentiment" }, sentiment_data)
+        headers, body = to_binary(event)
+
+
+        print("sentiment score is [" + str(sentiment) + "]")
+
+        requests.post(reviews_sentiment_sink, data=body, headers=headers)
+
     except json.JSONDecodeError:
         print("Non-JSON message received, skipping...")
     except KeyError:
